@@ -23,5 +23,5 @@ BigTable inspired connector for Hadoop 1.0.3.
 
 ### Work In Progress
 
-This project is  a work in process. Assume Unstable. I hope to finish it by the end of the wwek Nov 24 2013. 
+This project is  a work in process. Assume Unstable. I hope to finish it by the end of the week Nov 24 2013. 
 I'll be sure to document everything.
