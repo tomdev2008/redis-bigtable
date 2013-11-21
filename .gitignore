@@ -1,1 +1,5 @@
 target/
+*.rdb
+.classpath
+.project
+.settings

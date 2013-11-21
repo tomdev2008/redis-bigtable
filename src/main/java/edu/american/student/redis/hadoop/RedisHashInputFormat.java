@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and<br>
  * limitations under the License.<br>
  */
-package edu.american.student.redis;
+package edu.american.student.redis.hadoop;
 
 import java.io.IOException;
 import java.util.ArrayList;
