@@ -139,6 +139,13 @@ public class RedisForeman
 		return instance != null;
 	}
 
+	/**
+	 * Writes an entry to Redis in the form (table, row, column family, column qualifier, value)
+	 * @param table The table to write the entry
+	 * @param key The entry's identifiers
+	 * @param value The entry's value
+	 * @throws RedisForemanException Writing to table that does not exist
+	 */
 	public void write(byte[] table, RedisBigTableKey key, byte[] value) throws RedisForemanException
 	{
 		if (tableExists(table))
@@ -151,11 +158,26 @@ public class RedisForeman
 		}
 	}
 
+	/**
+	 * Writes an entry to Redis in the form (table, row, column family, column qualifier, value)
+	 * @param table The table to write the entry to
+	 * @param row the entry's row identifier
+	 * @param cf the entry's column family identifier
+	 * @param cq the entry's column qualifier identifier
+	 * @param value the entry's value
+	 * @throws RedisForemanException Writing to a table that does not exist
+	 */
 	public void write(byte[] table, byte[] row, byte[] cf, byte[] cq, byte[] value) throws RedisForemanException
 	{
 		write(table, new RedisBigTableKey(row, cf, cq), value);
 	}
 
+	/**
+	 * Writes an entry to Redis in the form (table, row, column family, column qualifier, value)
+	 * @param table The table to write an entry to
+	 * @param map A map of keys and their respective values
+	 * @throws RedisForemanException writing to a table that does not exist
+	 */
 	public void write(byte[] table, Map<RedisBigTableKey, byte[]> map) throws RedisForemanException
 	{
 		for (Entry<RedisBigTableKey, byte[]> ent : map.entrySet())
@@ -164,12 +186,24 @@ public class RedisForeman
 		}
 	}
 
+	/**
+	 * Removes a Entry
+	 * @param table The table where the entry is
+	 * @param row The row identifier of the entry to delete
+	 * @param columnFamily The column family identifier of the entry to delete
+	 * @param columnQualifier The column qualifier identifier of the entry to delete
+	 */
 	public void deleteRow(byte[] table, byte[] row, byte[] columnFamily, byte[] columnQualifier)
 	{
 		deleteRow(table, new RedisBigTableKey(row, columnFamily, columnQualifier));
 	}
 
-	private void deleteRow(byte[] table, RedisBigTableKey redisBigTableKey)
+	/**
+	 * Removes a Entry
+	 * @param table table where the entry to delete is
+	 * @param redisBigTableKey The key to delete
+	 */
+	public void deleteRow(byte[] table, RedisBigTableKey redisBigTableKey)
 	{
 		if (tableExists(table))
 		{
@@ -181,6 +215,12 @@ public class RedisForeman
 		}
 	}
 
+	/**
+	 * Returns an entire table's entries.  May throw Heap Space exceptions for large tables!
+	 * @param table the table to grab entries from
+	 * @return
+	 * @throws RedisForemanException table does not exist
+	 */
 	public Map<RedisBigTableKey, byte[]> getAll(byte[] table) throws RedisForemanException
 	{
 		if (tableExists(table))
@@ -199,6 +239,14 @@ public class RedisForeman
 		}
 	}
 
+	//TODO: getByRow is grabbing all entries and then filtering, better internal structure is needed to remedy
+	/**
+	 *  Returns all entries under a row identifier
+	 * @param table table where the row is located
+	 * @param row row to grab entries from
+	 * @return
+	 * @throws RedisForemanException table does not exist
+	 */
 	public Map<RedisBigTableKey, byte[]> getByRow(byte[] table, byte[] row) throws RedisForemanException
 	{
 		Map<RedisBigTableKey, byte[]> all = getAll(table);
@@ -214,6 +262,15 @@ public class RedisForeman
 		return toReturn;
 	}
 
+	//TODO: getByFamily is grabbing all entries and then filtering, better internal structure is needed to remedy
+	/**
+	 * Returns all entries under a row and column family identifier
+	 * @param table table where the row and family are
+	 * @param row row where to grab entries from
+	 * @param columnFamily columnFamily under that row to grab entries from
+	 * @return
+	 * @throws RedisForemanException table does not exist
+	 */
 	public Map<RedisBigTableKey, byte[]> getByFamily(byte[] table, byte[] row, byte[] columnFamily) throws RedisForemanException
 	{
 		Map<RedisBigTableKey, byte[]> all = getAll(table);
@@ -229,11 +286,28 @@ public class RedisForeman
 		return toReturn;
 	}
 
+	//TODO: getByQualifier is grabbing all entries and then filtering, better internal structure is needed to remedy
+	/**
+	 * Returns all entries under a row, column family, and column qualifier identifier
+	 * @param table table where the row, cf, and cq are
+	 * @param row the row where to grab entries from
+	 * @param cf the column family under that row to grab entries from
+	 * @param cq the column qualifier under the column family to grab entries from
+	 * @return
+	 * @throws RedisForemanException table does not exist
+	 */
 	public Entry<RedisBigTableKey, byte[]> getByQualifier(byte[] table, byte[] row, byte[] cf, byte[] cq) throws RedisForemanException
 	{
 		return getByKey(table, new RedisBigTableKey(row, cf, cq));
 	}
 
+	/**
+	 * Returns all entries under a row, column family, and column qualifier identifier
+	 * @param table table table where the row, cf, and cq are
+	 * @param k key where the value is
+	 * @return
+	 * @throws RedisForemanException
+	 */
 	public Entry<RedisBigTableKey, byte[]> getByKey(byte[] table, RedisBigTableKey k) throws RedisForemanException
 	{
 		if (tableExists(table))
