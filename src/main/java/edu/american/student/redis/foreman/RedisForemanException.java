@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.american.student.redis;
+package edu.american.student.redis.foreman;
 
-public class Utils
+public class RedisForemanException extends Exception
 {
 
-	public static final byte RECORD_SEPARATOR = "\0x1E".getBytes()[0];
+	public RedisForemanException(String msg)
+	{
+		super(msg);
+	}
+
+	private static final long serialVersionUID = 3879473019128217832L;
 
 }

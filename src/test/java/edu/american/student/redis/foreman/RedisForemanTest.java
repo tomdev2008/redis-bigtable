@@ -34,7 +34,7 @@ public class RedisForemanTest
 	}
 
 	@Test
-	public void addRowsTest()
+	public void addRowsTest() throws Exception
 	{
 		byte[] table = "example2".getBytes();
 		byte[] row = "row2".getBytes();
@@ -44,7 +44,7 @@ public class RedisForemanTest
 		foreman.createTable(table);
 		foreman.write(table, row, cf, cq, value);
 		Entry<RedisBigTableKey, byte[]> returnedValue = foreman.getByQualifier(table, row, cf, cq);
-		assertEquals(new String(value),new String(returnedValue.getValue()));
+		assertEquals(new String(value), new String(returnedValue.getValue()));
 	}
 
 }
