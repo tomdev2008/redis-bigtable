@@ -47,6 +47,7 @@ public class RedisForeman
 	/**
 	 * Creates (or reinstates) a connection to Redis
 	 */
+	/*Test: RedisForemanTest.connectionTest*/
 	public void connect()
 	{
 		host = ForemanConstants.REDIS_HOST.toString();
@@ -58,6 +59,7 @@ public class RedisForeman
 	/**
 	 * Tells Jedis to disconnect from Redis
 	 */
+	/*Test: RedisForemanTest.connectionTest*/
 	public void disconnect()
 	{
 		instance.disconnect();
@@ -69,6 +71,7 @@ public class RedisForeman
 	 * Create a table. 
 	 * @param table the table name
 	 */
+	/*Test: RedisForemanTest.createDeleteTableTest*/
 	public void createTable(byte[] table)
 	{
 		if (!tableExists(table))
@@ -85,6 +88,7 @@ public class RedisForeman
 	 * Delete a table.
 	 * @param table the table to delete
 	 */
+	/*Test: RedisForemanTest.createDeleteTableTest*/
 	public void deleteTable(byte[] table)
 	{
 		if (tableExists(table))
@@ -105,6 +109,7 @@ public class RedisForeman
 	/**
 	 * Deletes all tables.
 	 */
+	/*Test: RedisForemanTest.deleteTablesTest*/
 	public void deleteTables()
 	{
 		Set<byte[]> keys = instance.hkeys("TABLE".getBytes());
@@ -125,6 +130,7 @@ public class RedisForeman
 	 * @param table the table to check
 	 * @return
 	 */
+	/*Test: RedisForemanTest.createDeleteTableTest*/
 	public boolean tableExists(byte[] table)
 	{
 		return instance.hexists("TABLE".getBytes(), table);
@@ -134,6 +140,7 @@ public class RedisForeman
 	 * Checks if the Foreman is still connected to Redis
 	 * @return
 	 */
+	/*Test: RedisForemanTest.connectionTest*/
 	public boolean isConnected()
 	{
 		return instance != null;
