@@ -153,6 +153,7 @@ public class RedisForeman
 	 * @param value The entry's value
 	 * @throws RedisForemanException Writing to table that does not exist
 	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public void write(byte[] table, RedisBigTableKey key, byte[] value) throws RedisForemanException
 	{
 		if (tableExists(table))
@@ -174,6 +175,7 @@ public class RedisForeman
 	 * @param value the entry's value
 	 * @throws RedisForemanException Writing to a table that does not exist
 	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public void write(byte[] table, byte[] row, byte[] cf, byte[] cq, byte[] value) throws RedisForemanException
 	{
 		write(table, new RedisBigTableKey(row, cf, cq), value);
@@ -185,6 +187,7 @@ public class RedisForeman
 	 * @param map A map of keys and their respective values
 	 * @throws RedisForemanException writing to a table that does not exist
 	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public void write(byte[] table, Map<RedisBigTableKey, byte[]> map) throws RedisForemanException
 	{
 		for (Entry<RedisBigTableKey, byte[]> ent : map.entrySet())
@@ -200,6 +203,7 @@ public class RedisForeman
 	 * @param columnFamily The column family identifier of the entry to delete
 	 * @param columnQualifier The column qualifier identifier of the entry to delete
 	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public void deleteRow(byte[] table, byte[] row, byte[] columnFamily, byte[] columnQualifier)
 	{
 		deleteRow(table, new RedisBigTableKey(row, columnFamily, columnQualifier));
@@ -210,6 +214,7 @@ public class RedisForeman
 	 * @param table table where the entry to delete is
 	 * @param redisBigTableKey The key to delete
 	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public void deleteRow(byte[] table, RedisBigTableKey redisBigTableKey)
 	{
 		if (tableExists(table))
@@ -228,6 +233,7 @@ public class RedisForeman
 	 * @return
 	 * @throws RedisForemanException table does not exist
 	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public Map<RedisBigTableKey, byte[]> getAll(byte[] table) throws RedisForemanException
 	{
 		if (tableExists(table))
@@ -254,6 +260,7 @@ public class RedisForeman
 	 * @return
 	 * @throws RedisForemanException table does not exist
 	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public Map<RedisBigTableKey, byte[]> getByRow(byte[] table, byte[] row) throws RedisForemanException
 	{
 		Map<RedisBigTableKey, byte[]> all = getAll(table);
@@ -278,6 +285,7 @@ public class RedisForeman
 	 * @return
 	 * @throws RedisForemanException table does not exist
 	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public Map<RedisBigTableKey, byte[]> getByFamily(byte[] table, byte[] row, byte[] columnFamily) throws RedisForemanException
 	{
 		Map<RedisBigTableKey, byte[]> all = getAll(table);
@@ -303,6 +311,7 @@ public class RedisForeman
 	 * @return
 	 * @throws RedisForemanException table does not exist
 	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public Entry<RedisBigTableKey, byte[]> getByQualifier(byte[] table, byte[] row, byte[] cf, byte[] cq) throws RedisForemanException
 	{
 		return getByKey(table, new RedisBigTableKey(row, cf, cq));
@@ -315,6 +324,7 @@ public class RedisForeman
 	 * @return
 	 * @throws RedisForemanException
 	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public Entry<RedisBigTableKey, byte[]> getByKey(byte[] table, RedisBigTableKey k) throws RedisForemanException
 	{
 		if (tableExists(table))
@@ -332,6 +342,17 @@ public class RedisForeman
 		throw new RedisForemanException("Get Entry by Key failed. Table " + new String(table) + " does not exist");
 	}
 
+	/**
+	 * Checks if an entry exists
+	 * @param table
+	 * @param row
+	 * @param cf
+	 * @param cq
+	 * @param value
+	 * @return
+	 * @throws RedisForemanException
+	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public boolean entryExists(byte[] table, byte[] row, byte[] cf, byte[] cq, byte[] value) throws RedisForemanException
 	{
 		Entry<RedisBigTableKey, byte[]> ent = getByQualifier(table, row, cf, cq);
@@ -352,21 +373,54 @@ public class RedisForeman
 		return false;
 	}
 
+	/**
+	 * Checks to see if  TABLE,ROW,CF,CQ entries exist
+	 * @param table
+	 * @param row
+	 * @param cf
+	 * @param cq
+	 * @return
+	 * @throws RedisForemanException
+	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public boolean columnQualifierExists(byte[] table, byte[] row, byte[] cf, byte[] cq) throws RedisForemanException
 	{
 		return getByQualifier(table, row, cf, cq) != null;
 	}
 
+	/**
+	 * Checks to see if TABLE,ROW,CF entries exist
+	 * @param table
+	 * @param row
+	 * @param cf
+	 * @return
+	 * @throws RedisForemanException
+	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public boolean columnFamilyExists(byte[] table, byte[] row, byte[] cf) throws RedisForemanException
 	{
 		return !getByFamily(table, row, cf).isEmpty();
 	}
 
+	/**
+	 * CHecks to see if TABLE,ROW entries exist
+	 * @param table
+	 * @param row
+	 * @return
+	 * @throws RedisForemanException
+	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public boolean rowExists(byte[] table, byte[] row) throws RedisForemanException
 	{
 		return !getByRow(table, row).isEmpty();
 	}
 
+	/**
+	 * Removes rows 
+	 * @param table
+	 * @param map
+	 */
+	/*Test: RedisForemanTest.writeToTableTest*/
 	public void deleteRows(byte[] table, Map<RedisBigTableKey, byte[]> map)
 	{
 		for (Entry<RedisBigTableKey, byte[]> ent : map.entrySet())
