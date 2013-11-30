@@ -28,9 +28,24 @@ public class RedisBigTableKey
 
 	public RedisBigTableKey(byte[] row, byte[] columnFamily, byte[] columnQualifier)
 	{
+		validate(row);
+		validate(columnFamily);
+		validate(columnQualifier);
 		this.row = row;
 		this.cf = columnFamily;
 		this.cq = columnQualifier;
+	}
+
+	private void validate(byte[] bytes)
+	{
+		for (byte b : bytes)
+		{
+			if (b == Utils.RECORD_SEPARATOR)
+			{
+				throw new RuntimeException("Key contains a Record Separator 0x1E");
+			}
+		}
+
 	}
 
 	public byte[] toRedisField()
@@ -71,10 +86,12 @@ public class RedisBigTableKey
 			if (!rowFinished && b == Utils.RECORD_SEPARATOR)
 			{
 				rowFinished = true;
+				continue;
 			}
 			else if (!cfFinished && b == Utils.RECORD_SEPARATOR)
 			{
 				cfFinished = true;
+				continue;
 			}
 
 			if (!rowFinished)

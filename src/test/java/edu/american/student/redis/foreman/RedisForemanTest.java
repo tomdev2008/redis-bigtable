@@ -31,7 +31,7 @@ public class RedisForemanTest
 		foreman.createTable(exampleTable);
 		assertTrue("Created Table does not exist", foreman.tableExists(exampleTable));
 		foreman.deleteTable(exampleTable);
-		assertTrue("Removed Table still exists", foreman.tableExists(exampleTable));
+		assertTrue("Removed Table still exists", !foreman.tableExists(exampleTable));
 	}
 
 	@Test
@@ -62,14 +62,14 @@ public class RedisForemanTest
 		byte[] cq = "column qualifier".getBytes();
 		byte[] value = "value".getBytes();
 		foreman.write(table, row, cf, cq, value);
-		//TODO
-		/*
 		assertTrue(foreman.rowExists(table, row));
-		assertTrue(foreman.columnFamilyExists(table, cf));
-		assertTrue(foreman.columnQualifierExists(table, cf, cq));
+		assertTrue(foreman.columnFamilyExists(table, row, cf));
+		assertTrue(foreman.columnQualifierExists(table, row, cf, cq));
 		assertTrue(foreman.entryExists(table, row, cf, cq, value));
-		foreman.write(table, map);
-		foreman.write(table, key, value);*/
+		foreman.deleteRow(table, row, cf, cq);
+		assertTrue(!foreman.rowExists(table, row));
+		/*	foreman.write(table, map);
+			foreman.write(table, key, value);*/
 
 	}
 

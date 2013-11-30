@@ -263,6 +263,7 @@ public class RedisForeman
 		{
 			if (startsWith(ent.getKey(), keyIsLike))
 			{
+				//log.debug(ent.getKey() + " " + ent.getValue());
 				toReturn.put(ent.getKey(), ent.getValue());
 			}
 		}
@@ -320,8 +321,13 @@ public class RedisForeman
 		if (tableExists(table))
 		{
 			byte[] val = instance.hget(table, k.toRedisField());
+			if (val == null)
+			{
+				return null;
+			}
 			Map<RedisBigTableKey, byte[]> value = new HashMap<RedisBigTableKey, byte[]>();
 			value.put(k, val);
+			value.entrySet();
 			return value.entrySet().iterator().next();
 		}
 		throw new RedisForemanException("Get Entry by Key failed. Table " + new String(table) + " does not exist");
@@ -329,6 +335,9 @@ public class RedisForeman
 
 	private boolean startsWith(RedisBigTableKey key, String keyIsLike)
 	{
+		log.debug("StartsWith ------"+"--------"+keyIsLike);
+		log.debug("row:"+key.toString());
+		log.debug(key.toString().startsWith(keyIsLike)+"");
 		return key.toString().startsWith(keyIsLike);
 	}
 
@@ -337,13 +346,45 @@ public class RedisForeman
 		StringBuilder sb = new StringBuilder();
 		for (byte[] part : parts)
 		{
-			for (byte b : part)
-			{
-				sb.append(b);
-			}
-			sb.append(recordSeparator);
+			sb.append(new String(part));
+			sb.append((char)recordSeparator);
 		}
-		return sb.toString().replaceAll(String.valueOf(recordSeparator) + "$", "");
+		return sb.toString().replaceAll(recordSeparator + "$", "");
+	}
+
+	public boolean entryExists(byte[] table, byte[] row, byte[] cf, byte[] cq, byte[] value) throws RedisForemanException
+	{
+		Entry<RedisBigTableKey, byte[]> ent = this.getByQualifier(table, row, cf, cq);
+		if (ent != null)
+		{
+			if (ent.getValue().length == value.length)
+			{
+				boolean equals = true;
+				for (int i = 0; i < ent.getValue().length; i++)
+				{
+					byte b1 = ent.getValue()[i];
+					byte b2 = value[i];
+					equals = equals && (b1 == b2);
+				}
+				return equals;
+			}
+		}
+		return false;
+	}
+
+	public boolean columnQualifierExists(byte[] table, byte[] row, byte[] cf, byte[] cq) throws RedisForemanException
+	{
+		return this.getByQualifier(table, row, cf, cq) != null;
+	}
+
+	public boolean columnFamilyExists(byte[] table, byte[] row, byte[] cf) throws RedisForemanException
+	{
+		return !this.getByFamily(table, row, cf).isEmpty();
+	}
+
+	public boolean rowExists(byte[] table, byte[] row) throws RedisForemanException
+	{
+		return !this.getByRow(table, row).isEmpty();
 	}
 
 }
