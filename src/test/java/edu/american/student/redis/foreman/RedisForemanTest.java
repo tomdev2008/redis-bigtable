@@ -2,8 +2,13 @@ package edu.american.student.redis.foreman;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import edu.american.student.redis.hadoop.RedisBigTableKey;
 
 public class RedisForemanTest
 {
@@ -54,7 +59,9 @@ public class RedisForemanTest
 	public void writeToTableTest() throws Exception
 	{
 		RedisForeman foreman = new RedisForeman();
+		foreman.deleteTables();
 		byte[] table = "example".getBytes();
+		assertTrue(!foreman.tableExists(table));
 		foreman.createTable(table);
 		assertTrue(foreman.tableExists(table));
 		byte[] row = "row".getBytes();
@@ -62,29 +69,40 @@ public class RedisForemanTest
 		byte[] cq = "column qualifier".getBytes();
 		byte[] value = "value".getBytes();
 		foreman.write(table, row, cf, cq, value);
-		assertTrue(foreman.rowExists(table, row));
-		assertTrue(foreman.columnFamilyExists(table, row, cf));
-		assertTrue(foreman.columnQualifierExists(table, row, cf, cq));
-		assertTrue(foreman.entryExists(table, row, cf, cq, value));
+		assertTrue("Foreman could not find row that was just written", foreman.rowExists(table, row));
+		assertTrue("Foreman could not found column family that was just written", foreman.columnFamilyExists(table, row, cf));
+		assertTrue("Foreman could not find column qualifier that was just written", foreman.columnQualifierExists(table, row, cf, cq));
+		assertTrue("Foreman could not find entry that was just written", foreman.entryExists(table, row, cf, cq, value));
 		foreman.deleteRow(table, row, cf, cq);
-		assertTrue(!foreman.rowExists(table, row));
-		/*	foreman.write(table, map);
-			foreman.write(table, key, value);*/
+		assertTrue("Foreman found row that was just deleted", !foreman.rowExists(table, row));
+		assertTrue("Foreman found column family that was deleted", !foreman.columnFamilyExists(table, row, cf));
+		assertTrue("Foreman found column qualifier that was just deleted", !foreman.columnQualifierExists(table, row, cf, cq));
+		assertTrue("Foreman found entry that was just deleted", !foreman.entryExists(table, row, cf, cq, value));
+		RedisBigTableKey key = new RedisBigTableKey(row, cf, cq);
+		foreman.write(table, key, value);
+		assertTrue("Foreman could not find row that was just written", foreman.rowExists(table, row));
+		assertTrue("Foreman could not found column family that was just written", foreman.columnFamilyExists(table, row, cf));
+		assertTrue("Foreman could not find column qualifier that was just written", foreman.columnQualifierExists(table, row, cf, cq));
+		assertTrue("Foreman could not find entry that was just written", foreman.entryExists(table, row, cf, cq, value));
+		foreman.deleteRow(table, key);
+		assertTrue("Foreman found row that was just deleted", !foreman.rowExists(table, row));
+		assertTrue("Foreman found column family that was deleted", !foreman.columnFamilyExists(table, row, cf));
+		assertTrue("Foreman found column qualifier that was just deleted", !foreman.columnQualifierExists(table, row, cf, cq));
+		assertTrue("Foreman found entry that was just deleted", !foreman.entryExists(table, row, cf, cq, value));
+
+		Map<RedisBigTableKey, byte[]> map = new HashMap<RedisBigTableKey, byte[]>();
+		map.put(key, value);
+		foreman.write(table, map);
+		assertTrue("Foreman could not find row that was just written", foreman.rowExists(table, row));
+		assertTrue("Foreman could not found column family that was just written", foreman.columnFamilyExists(table, row, cf));
+		assertTrue("Foreman could not find column qualifier that was just written", foreman.columnQualifierExists(table, row, cf, cq));
+		assertTrue("Foreman could not find entry that was just written", foreman.entryExists(table, row, cf, cq, value));
+		foreman.deleteRows(table, map);
+		assertTrue("Foreman found row that was just deleted", !foreman.rowExists(table, row));
+		assertTrue("Foreman found column family that was deleted", !foreman.columnFamilyExists(table, row, cf));
+		assertTrue("Foreman found column qualifier that was just deleted", !foreman.columnQualifierExists(table, row, cf, cq));
+		assertTrue("Foreman found entry that was just deleted", !foreman.entryExists(table, row, cf, cq, value));
 
 	}
-
-	//	@Test
-	//	public void addRowsTest() throws Exception
-	//	{
-	//		byte[] table = "example2".getBytes();
-	//		byte[] row = "row2".getBytes();
-	//		byte[] cf = "cf2".getBytes();
-	//		byte[] cq = "cq2".getBytes();
-	//		byte[] value = "value".getBytes();
-	//		foreman.createTable(table);
-	//		foreman.write(table, row, cf, cq, value);
-	//		Entry<RedisBigTableKey, byte[]> returnedValue = foreman.getByQualifier(table, row, cf, cq);
-	//		assertEquals(new String(value), new String(returnedValue.getValue()));
-	//	}
 
 }

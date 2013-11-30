@@ -263,7 +263,6 @@ public class RedisForeman
 		{
 			if (startsWith(ent.getKey(), keyIsLike))
 			{
-				//log.debug(ent.getKey() + " " + ent.getValue());
 				toReturn.put(ent.getKey(), ent.getValue());
 			}
 		}
@@ -333,28 +332,9 @@ public class RedisForeman
 		throw new RedisForemanException("Get Entry by Key failed. Table " + new String(table) + " does not exist");
 	}
 
-	private boolean startsWith(RedisBigTableKey key, String keyIsLike)
-	{
-		log.debug("StartsWith ------"+"--------"+keyIsLike);
-		log.debug("row:"+key.toString());
-		log.debug(key.toString().startsWith(keyIsLike)+"");
-		return key.toString().startsWith(keyIsLike);
-	}
-
-	private String join(byte recordSeparator, byte[]... parts)
-	{
-		StringBuilder sb = new StringBuilder();
-		for (byte[] part : parts)
-		{
-			sb.append(new String(part));
-			sb.append((char)recordSeparator);
-		}
-		return sb.toString().replaceAll(recordSeparator + "$", "");
-	}
-
 	public boolean entryExists(byte[] table, byte[] row, byte[] cf, byte[] cq, byte[] value) throws RedisForemanException
 	{
-		Entry<RedisBigTableKey, byte[]> ent = this.getByQualifier(table, row, cf, cq);
+		Entry<RedisBigTableKey, byte[]> ent = getByQualifier(table, row, cf, cq);
 		if (ent != null)
 		{
 			if (ent.getValue().length == value.length)
@@ -374,17 +354,40 @@ public class RedisForeman
 
 	public boolean columnQualifierExists(byte[] table, byte[] row, byte[] cf, byte[] cq) throws RedisForemanException
 	{
-		return this.getByQualifier(table, row, cf, cq) != null;
+		return getByQualifier(table, row, cf, cq) != null;
 	}
 
 	public boolean columnFamilyExists(byte[] table, byte[] row, byte[] cf) throws RedisForemanException
 	{
-		return !this.getByFamily(table, row, cf).isEmpty();
+		return !getByFamily(table, row, cf).isEmpty();
 	}
 
 	public boolean rowExists(byte[] table, byte[] row) throws RedisForemanException
 	{
-		return !this.getByRow(table, row).isEmpty();
+		return !getByRow(table, row).isEmpty();
 	}
 
+	public void deleteRows(byte[] table, Map<RedisBigTableKey, byte[]> map)
+	{
+		for (Entry<RedisBigTableKey, byte[]> ent : map.entrySet())
+		{
+			deleteRow(table, ent.getKey());
+		}
+	}
+
+	private boolean startsWith(RedisBigTableKey key, String keyIsLike)
+	{
+		return key.toString().startsWith(keyIsLike);
+	}
+
+	private String join(byte recordSeparator, byte[]... parts)
+	{
+		StringBuilder sb = new StringBuilder();
+		for (byte[] part : parts)
+		{
+			sb.append(new String(part));
+			sb.append((char) recordSeparator);
+		}
+		return sb.toString().replaceAll(recordSeparator + "$", "");
+	}
 }
