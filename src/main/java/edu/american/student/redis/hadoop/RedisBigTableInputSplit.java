@@ -1,29 +1,48 @@
 package edu.american.student.redis.hadoop;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 
-public class RedisBigTableInputSplit extends InputSplit
+public class RedisBigTableInputSplit extends InputSplit implements Writable
 {
+	private RedisBigTableKey key;
+	private byte[] value;
 
 	public RedisBigTableInputSplit(RedisBigTableKey k, byte[] v)
 	{
-		// TODO Auto-generated constructor stub
+		key = k;
+		value = v;
 	}
 
 	@Override
 	public long getLength() throws IOException, InterruptedException
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return (key.toRedisField().length + value.length);
 	}
 
 	@Override
 	public String[] getLocations() throws IOException, InterruptedException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new String[] {new String(key.toRedisField())};
+	}
+
+	@Override
+	public void readFields(DataInput in) throws IOException
+	{
+		key = RedisBigTableKey.inflate(in.readUTF().getBytes());
+		value = in.readUTF().getBytes();
+	}
+
+	@Override
+	public void write(DataOutput out) throws IOException
+	{
+		out.writeUTF(new String(key.toRedisField()));
+		out.writeUTF(new String(value));
+
 	}
 
 }

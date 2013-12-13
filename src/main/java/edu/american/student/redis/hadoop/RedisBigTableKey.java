@@ -36,6 +36,21 @@ public class RedisBigTableKey
 		this.cq = columnQualifier;
 	}
 
+	public byte[] getRow()
+	{
+		return row;
+	}
+
+	public byte[] getColumnFamily()
+	{
+		return cf;
+	}
+
+	public byte[] getColumnQualifier()
+	{
+		return cq;
+	}
+
 	private void validate(byte[] bytes)
 	{
 		for (byte b : bytes)

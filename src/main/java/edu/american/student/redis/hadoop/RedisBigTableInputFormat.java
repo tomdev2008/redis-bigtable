@@ -11,7 +11,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-public class RedisBigTableInputFormat extends InputFormat<Text, Text>
+public class RedisBigTableInputFormat extends InputFormat<RedisBigTableKey, Text>
 {
 	private List<byte[]> rows = new ArrayList<byte[]>();
 	private List<byte[]> cfs = new ArrayList<byte[]>();
@@ -19,10 +19,9 @@ public class RedisBigTableInputFormat extends InputFormat<Text, Text>
 	private List<byte[]> values = new ArrayList<byte[]>();
 
 	@Override
-	public RecordReader<Text, Text> createRecordReader(InputSplit arg0, TaskAttemptContext arg1) throws IOException, InterruptedException
+	public RecordReader<RedisBigTableKey, Text> createRecordReader(InputSplit arg0, TaskAttemptContext arg1) throws IOException, InterruptedException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new RedisBigTableRecordReader();
 	}
 
 	public void fetchRows(byte[]... rows)
