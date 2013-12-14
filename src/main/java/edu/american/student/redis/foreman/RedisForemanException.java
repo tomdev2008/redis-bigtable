@@ -15,12 +15,14 @@
  */
 package edu.american.student.redis.foreman;
 
+import edu.american.student.redis.MFactory;
+
 public class RedisForemanException extends Exception
 {
 
-	public RedisForemanException(String msg)
+	public RedisForemanException(MFactory f)
 	{
-		super(msg);
+		super(f.toString());
 	}
 
 	private static final long serialVersionUID = 3879473019128217832L;

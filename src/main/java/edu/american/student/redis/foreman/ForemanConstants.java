@@ -84,4 +84,23 @@ public class ForemanConstants
 			return null;
 		}
 	}
+
+	public enum RowIdentifierPart
+	{
+		ROW_LOG;
+		public byte[] getId()
+		{
+			return name().getBytes();
+		}
+	}
+
+	public enum TableIdentifierPart
+	{
+		CREATED;
+
+		public byte[] getId()
+		{
+			return name().getBytes();
+		}
+	}
 }

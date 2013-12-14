@@ -69,7 +69,14 @@ public class RedisForemanTest
 		foreman.write(exampleTable1, key, Utils.EMPTY);
 		int instances = foreman.getInstancesOfRow(r);
 		assertTrue("Number of Row instances not showing up", instances == 1);
+		byte[] cf2 = "columnfam2".getBytes();
+		byte[] cq2 = "columnqual2".getBytes();
+		RedisBigTableKey key2 = new RedisBigTableKey(r, cf2, cq2);
+		foreman.write(exampleTable1, key2, Utils.EMPTY);
+		instances = foreman.getInstancesOfRow(r);
+		assertTrue("Number of Row instances not showing up", instances == 2);
 		foreman.deleteRow(exampleTable1, key);
+		foreman.deleteRow(exampleTable1, key2);
 		instances = foreman.getInstancesOfRow(r);
 		assertTrue("Number of Row instannces did not decrement after deletion", instances == 0);
 	}

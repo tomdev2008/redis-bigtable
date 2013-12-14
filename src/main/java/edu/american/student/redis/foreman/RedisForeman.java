@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
+import edu.american.student.redis.MessageFactory;
 import edu.american.student.redis.Utils;
 import edu.american.student.redis.foreman.ForemanConstants.TableIdentifier;
 import edu.american.student.redis.hadoop.RedisBigTableKey;
@@ -79,7 +80,7 @@ public class RedisForeman
 		boolean tableExists = tableExists(table);
 		if (!tableExists && !isSystemTable)
 		{
-			instance.hset(ForemanConstants.TableIdentifier.TABLE.getId(), table, "CREATED".getBytes());
+			instance.hset(ForemanConstants.TableIdentifier.TABLE.getId(), table, ForemanConstants.TableIdentifierPart.CREATED.getId());
 		}
 		else if (isSystemTable)
 		{
@@ -189,15 +190,15 @@ public class RedisForeman
 		}
 		else if (!tableExists)
 		{
-			throw new RedisForemanException("Write failed. Table " + new String(table) + " does not exist");
+			throw new RedisForemanException(MessageFactory.objective("Write entry").issue("Table does not exist").objects(new String(table)));
 		}
 		else if (hasWildCard)
 		{
-			throw new RedisForemanException("Write failed. Given key has a wildcard(" + Utils.WILD_CARD + ")");
+			throw new RedisForemanException(MessageFactory.objective("Write entry").issue("Given key has a wildcard").objects(key, Utils.WILD_CARD));
 		}
 		else if (hasEmptyParts)
 		{
-			throw new RedisForemanException("Write failed. Given key has empty parts.");
+			throw new RedisForemanException(MessageFactory.objective("Write entry").issue("Given key has empty parts.").objects(key));
 		}
 	}
 
@@ -292,7 +293,7 @@ public class RedisForeman
 		}
 		else
 		{
-			throw new RedisForemanException("Grab all entries failed. Table " + new String(table) + " does not exist");
+			throw new RedisForemanException(MessageFactory.objective("Grab all entries").issue("Table does not exist").objects(new String(table)));
 		}
 	}
 
@@ -387,11 +388,11 @@ public class RedisForeman
 		}
 		else if (emptyParts)
 		{
-			throw new RedisForemanException("Get Entry by Key failed. Key  has empty parts. " + new String(k.toRedisField()));
+			throw new RedisForemanException(MessageFactory.objective("Get entry by key").issue("Key has empty parts").objects(k));
 		}
 		else
 		{
-			throw new RedisForemanException("Get Entry by Key failed. Table " + new String(table) + " does not exist");
+			throw new RedisForemanException(MessageFactory.objective("Get entry by key").issue("Table does not exist").objects(new String(table)));
 		}
 	}
 
@@ -483,9 +484,16 @@ public class RedisForeman
 		}
 	}
 
+	/**
+	 * Returns a count of how many times that row appears in all tables
+	 * @param row
+	 * @return
+	 * @throws RedisForemanException
+	 */
+	/*Test: RedisForemanTest.rowInstancesTest*/
 	public int getInstancesOfRow(byte[] row) throws RedisForemanException
 	{
-		byte[] r = "ROW_LOG".getBytes();
+		byte[] r = ForemanConstants.RowIdentifierPart.ROW_LOG.getId();
 		byte[] cf = row;
 		byte[] cq = row;
 		RedisBigTableKey rowKey = new RedisBigTableKey(r, cf, cq);
@@ -519,8 +527,7 @@ public class RedisForeman
 
 	private boolean hasWildCard(RedisBigTableKey key)
 	{
-		boolean hasWildCard = false;
-		hasWildCard = hasWildCard && hasWildCard(key.getRow());
+		boolean hasWildCard = hasWildCard(key.getRow());
 		hasWildCard = hasWildCard && hasWildCard(key.getColumnFamily());
 		hasWildCard = hasWildCard && hasWildCard(key.getColumnQualifier());
 		return hasWildCard;
@@ -548,7 +555,7 @@ public class RedisForeman
 
 	private void incrementRow(byte[] row) throws RedisForemanException
 	{
-		byte[] r = "ROW_LOG".getBytes();
+		byte[] r = ForemanConstants.RowIdentifierPart.ROW_LOG.getId();
 		byte[] cf = row;
 		byte[] cq = row;
 		RedisBigTableKey rowKey = new RedisBigTableKey(r, cf, cq);
@@ -561,7 +568,6 @@ public class RedisForeman
 		{
 			int instanceOfRow = Integer.parseInt(new String(returned.getValue()));
 			instanceOfRow++;
-			log.info("Increment row {} {}", new String(row), instanceOfRow);
 			instance.hset(ForemanConstants.TableIdentifier.ROW.getId(), rowKey.toRedisField(), (instanceOfRow + "").getBytes());
 		}
 	}
@@ -575,7 +581,7 @@ public class RedisForeman
 
 	private void setRowInstanceCount(byte[] row, int instancesOfRow)
 	{
-		byte[] r = "ROW_LOG".getBytes();
+		byte[] r = ForemanConstants.RowIdentifierPart.ROW_LOG.getId();
 		byte[] cf = row;
 		byte[] cq = row;
 		RedisBigTableKey rowKey = new RedisBigTableKey(r, cf, cq);
