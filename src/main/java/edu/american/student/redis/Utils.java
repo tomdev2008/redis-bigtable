@@ -19,5 +19,7 @@ public class Utils
 {
 
 	public static final byte RECORD_SEPARATOR = 0x1E;
+	public static final byte WILD_CARD = '*';
+	public static final byte[] EMPTY = new byte[] {};
 
 }

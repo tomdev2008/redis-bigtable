@@ -156,13 +156,24 @@ public class RedisForeman
 	/*Test: RedisForemanTest.writeToTableTest*/
 	public void write(byte[] table, RedisBigTableKey key, byte[] value) throws RedisForemanException
 	{
-		if (tableExists(table))
+		boolean hasWildCard = hasWildCard(key);
+		boolean hasEmptyParts = hasEmptyParts(key);
+		boolean tableExists = tableExists(table);
+		if (tableExists && !hasWildCard && !hasEmptyParts)
 		{
 			instance.hset(table, key.toRedisField(), value);
 		}
-		else
+		else if (!tableExists)
 		{
 			throw new RedisForemanException("Write failed. Table " + new String(table) + " does not exist");
+		}
+		else if (hasWildCard)
+		{
+			throw new RedisForemanException("Write failed. Given key has a wildcard(" + Utils.WILD_CARD + ")");
+		}
+		else if (hasEmptyParts)
+		{
+			throw new RedisForemanException("Write failed. Given key has empty parts.");
 		}
 	}
 
@@ -443,5 +454,34 @@ public class RedisForeman
 			sb.append((char) recordSeparator);
 		}
 		return sb.toString().replaceAll(recordSeparator + "$", "");
+	}
+
+	private boolean hasWildCard(RedisBigTableKey key)
+	{
+		boolean hasWildCard = false;
+		hasWildCard = hasWildCard && hasWildCard(key.getRow());
+		hasWildCard = hasWildCard && hasWildCard(key.getColumnFamily());
+		hasWildCard = hasWildCard && hasWildCard(key.getColumnQualifier());
+		return hasWildCard;
+	}
+
+	private boolean hasWildCard(byte[] bytes)
+	{
+		for (byte part : bytes)
+		{
+			if (part == Utils.WILD_CARD)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean hasEmptyParts(RedisBigTableKey key)
+	{
+		boolean emptyParts = key.getRow().length == 0;
+		emptyParts = emptyParts && key.getColumnFamily().length == 0;
+		emptyParts = emptyParts && key.getColumnQualifier().length == 0;
+		return emptyParts;
 	}
 }
