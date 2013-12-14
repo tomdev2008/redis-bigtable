@@ -74,11 +74,17 @@ public class RedisForeman
 	/*Test: RedisForemanTest.createDeleteTableTest*/
 	public void createTable(byte[] table)
 	{
-		if (!tableExists(table))
+		boolean isSystemTable = ForemanConstants.TableIdentifier.getIdentifierFromName(table) != null;
+		boolean tableExists = tableExists(table);
+		if (!tableExists && !isSystemTable)
 		{
-			instance.hset(ForemanConstants.TABLE_ID, table, "CREATED".getBytes());
+			instance.hset(ForemanConstants.TableIdentifier.TABLE.getId(), table, "CREATED".getBytes());
 		}
-		else
+		else if (isSystemTable)
+		{
+			log.warn("Create table ignored. Table {} is a reserved system table", new String(table));
+		}
+		else if (tableExists)
 		{
 			log.warn("Create table ignored. Table {} exists", new String(table));
 		}
@@ -91,14 +97,19 @@ public class RedisForeman
 	/*Test: RedisForemanTest.createDeleteTableTest*/
 	public void deleteTable(byte[] table)
 	{
-		if (tableExists(table))
+		boolean isSystemTable = ForemanConstants.TableIdentifier.getIdentifierFromName(table) != null;
+		if (tableExists(table) && !isSystemTable)
 		{
-			instance.hdel(ForemanConstants.TABLE_ID, table);
+			instance.hdel(ForemanConstants.TableIdentifier.TABLE.getId(), table);
 			Set<byte[]> keys = instance.hkeys(table);
 			for (byte[] key : keys)
 			{
 				instance.hdel(table, key);
 			}
+		}
+		else if (isSystemTable)
+		{
+			log.warn("Delete table ignored. Table{} is a system table.", new String(table));
 		}
 		else
 		{
@@ -112,7 +123,7 @@ public class RedisForeman
 	/*Test: RedisForemanTest.deleteTablesTest*/
 	public void deleteTables()
 	{
-		Set<byte[]> keys = instance.hkeys(ForemanConstants.TABLE_ID);
+		Set<byte[]> keys = instance.hkeys(ForemanConstants.TableIdentifier.TABLE.getId());
 		for (byte[] key : keys)
 		{
 			Set<byte[]> subkeys = instance.hkeys(key);
@@ -120,8 +131,12 @@ public class RedisForeman
 			{
 				instance.hdel(key, subkey);
 			}
-			instance.hdel(ForemanConstants.TABLE_ID, key);
-			log.info("Table {} deleted", new String(key));
+			boolean isSystemTable = ForemanConstants.TableIdentifier.getIdentifierFromName(key) != null;
+			if (!isSystemTable)
+			{
+				instance.hdel(ForemanConstants.TableIdentifier.TABLE.getId(), key);
+				log.info("Table {} deleted", new String(key));
+			}
 		}
 	}
 
@@ -133,7 +148,12 @@ public class RedisForeman
 	/*Test: RedisForemanTest.createDeleteTableTest*/
 	public boolean tableExists(byte[] table)
 	{
-		return instance.hexists(ForemanConstants.TABLE_ID, table);
+		boolean isSystemTable = ForemanConstants.TableIdentifier.getIdentifierFromName(table) != null;
+		if (!isSystemTable)
+		{
+			return instance.hexists(ForemanConstants.TableIdentifier.TABLE.getId(), table);
+		}
+		return true;
 	}
 
 	/**
@@ -161,7 +181,10 @@ public class RedisForeman
 		boolean tableExists = tableExists(table);
 		if (tableExists && !hasWildCard && !hasEmptyParts)
 		{
+			//the row itself
 			instance.hset(table, key.toRedisField(), value);
+			//log the instance of the row
+			logRow(key.getRow());
 		}
 		else if (!tableExists)
 		{
@@ -455,6 +478,24 @@ public class RedisForeman
 		}
 	}
 
+	public int getInstancesOfRow(byte[] row) throws RedisForemanException
+	{
+		byte[] r = "ROW_LOG".getBytes();
+		byte[] cf = row;
+		byte[] cq = row;
+		RedisBigTableKey rowKey = new RedisBigTableKey(r, cf, cq);
+		Entry<RedisBigTableKey, byte[]> returned = getByKey(ForemanConstants.TableIdentifier.ROW.getId(), rowKey);
+		if (returned == null)
+		{
+			return 0;
+		}
+		else
+		{
+			int instancesOfRow = Integer.parseInt(new String(returned.getValue()));
+			return instancesOfRow;
+		}
+	}
+
 	private boolean startsWith(RedisBigTableKey key, String keyIsLike)
 	{
 		return key.toString().startsWith(keyIsLike);
@@ -498,5 +539,25 @@ public class RedisForeman
 		emptyParts = emptyParts && key.getColumnFamily().length == 0;
 		emptyParts = emptyParts && key.getColumnQualifier().length == 0;
 		return emptyParts;
+	}
+
+	private void logRow(byte[] row) throws RedisForemanException
+	{
+		byte[] r = "ROW_LOG".getBytes();
+		byte[] cf = row;
+		byte[] cq = row;
+		RedisBigTableKey rowKey = new RedisBigTableKey(r, cf, cq);
+		Entry<RedisBigTableKey, byte[]> returned = getByKey(ForemanConstants.TableIdentifier.ROW.getId(), rowKey);
+		if (returned == null)
+		{
+			instance.hset(ForemanConstants.TableIdentifier.ROW.getId(), rowKey.toRedisField(), "1".getBytes());
+		}
+		else
+		{
+			int instanceOfRow = Integer.parseInt(new String(returned.getValue()));
+			instanceOfRow++;
+			instance.hset(ForemanConstants.TableIdentifier.ROW.getId(), rowKey.toRedisField(), (instanceOfRow + "").getBytes());
+		}
+
 	}
 }

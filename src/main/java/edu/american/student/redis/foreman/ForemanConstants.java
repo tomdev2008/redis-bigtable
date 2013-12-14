@@ -56,5 +56,32 @@ public class ForemanConstants
 		}
 	}
 
-	public static final byte[] TABLE_ID = "TABLE".getBytes();
+	public enum TableIdentifier
+	{
+		TABLE, ROW;
+
+		private byte[] id;
+
+		TableIdentifier()
+		{
+			this.id = ("!" + name()).getBytes();
+		}
+
+		public byte[] getId()
+		{
+			return id;
+		}
+
+		public static TableIdentifier getIdentifierFromName(byte[] name)
+		{
+			for (TableIdentifier idd : TableIdentifier.values())
+			{
+				if (("!" + idd.name()).equals(new String(name)))
+				{
+					return idd;
+				}
+			}
+			return null;
+		}
+	}
 }

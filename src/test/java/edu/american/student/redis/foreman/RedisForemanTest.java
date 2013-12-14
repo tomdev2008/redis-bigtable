@@ -8,6 +8,7 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.american.student.redis.Utils;
 import edu.american.student.redis.hadoop.RedisBigTableKey;
 
 public class RedisForemanTest
@@ -53,6 +54,22 @@ public class RedisForemanTest
 		assertTrue("Table was not removed by deleteTables()", !foreman.tableExists(exampleTable1));
 		assertTrue("Table was not removed by deleteTables()", !foreman.tableExists(exampleTable2));
 
+	}
+
+	@Test
+	public void rowInstancesTest() throws Exception
+	{
+		RedisForeman foreman = new RedisForeman();
+		foreman.deleteTables();
+		byte[] exampleTable1 = "example".getBytes();
+		byte[] r = "row".getBytes();
+		byte[] cf = "column family".getBytes();
+		byte[] cq = "column qualifier".getBytes();
+		RedisBigTableKey key = new RedisBigTableKey(r, cf, cq);
+		foreman.createTable(exampleTable1);
+		foreman.write(exampleTable1, key, Utils.EMPTY);
+		int instances = foreman.getInstancesOfRow(r);
+		System.out.println(instances);
 	}
 
 	@Test
