@@ -56,6 +56,39 @@ public class RedisForemanTest
 	}
 
 	@Test
+	public void wildCardTest() throws Exception
+	{
+		RedisForeman foreman = new RedisForeman();
+		foreman.deleteTables();
+		byte[] exampleTable1 = "example".getBytes();
+		foreman.createTable(exampleTable1);
+
+		byte[] row = "row".getBytes();
+		byte[] row2 = "row2".getBytes();
+		byte[] a = "a".getBytes();
+		byte[] b = "b".getBytes();
+		byte[] c = "c".getBytes();
+		byte[] d = "d".getBytes();
+		foreman.write(exampleTable1, row, a, b, Utils.EMPTY);
+		foreman.write(exampleTable1, row2, b, c, Utils.EMPTY);
+		//test wildcard row
+		byte[] wildCard = new byte[] { Utils.WILD_CARD };
+		Map<RedisBigTableKey, byte[]> getByRowEntries = foreman.getByRow(exampleTable1, wildCard);
+		assertTrue("Wild card row did not return expected", getByRowEntries.size() == 2);
+
+		foreman.write(exampleTable1, row, b, c, Utils.EMPTY);
+		Map<RedisBigTableKey, byte[]> getByFamilyEntries = foreman.getByFamily(exampleTable1, row, wildCard);
+		assertTrue("Wild card column family on row 'row' did not return expected", getByFamilyEntries.size() == 2);
+		foreman.write(exampleTable1, row, b, d, Utils.EMPTY);
+		Map<RedisBigTableKey, byte[]> getByQualEntries = foreman.getByQualifier(exampleTable1, row, b, wildCard);
+		assertTrue("Wild card column qualifier did not return expected", getByQualEntries.size() == 2);
+
+		Map<RedisBigTableKey, byte[]> wildCardRowCF = foreman.getByQualifier(exampleTable1, wildCard, wildCard, c);
+		System.out.println(wildCardRowCF.size());
+		assertTrue("", wildCardRowCF.size() == 2);
+	}
+
+	@Test
 	public void rowInstancesTest() throws Exception
 	{
 		RedisForeman foreman = new RedisForeman();

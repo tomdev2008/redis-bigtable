@@ -309,11 +309,12 @@ public class RedisForeman
 	public Map<RedisBigTableKey, byte[]> getByRow(byte[] table, byte[] row) throws RedisForemanException
 	{
 		Map<RedisBigTableKey, byte[]> all = getAll(table);
+		boolean rowIsWildCard = Utils.hasWildCard(row);
 		String keyIsLike = join(Utils.RECORD_SEPARATOR, row);
 		Map<RedisBigTableKey, byte[]> toReturn = new HashMap<RedisBigTableKey, byte[]>();
 		for (Entry<RedisBigTableKey, byte[]> ent : all.entrySet())
 		{
-			if (startsWith(ent.getKey(), keyIsLike))
+			if (rowIsWildCard || startsWith(ent.getKey(), keyIsLike))
 			{
 				toReturn.put(ent.getKey(), ent.getValue());
 			}
@@ -333,12 +334,13 @@ public class RedisForeman
 	/*Test: RedisForemanTest.writeToTableTest*/
 	public Map<RedisBigTableKey, byte[]> getByFamily(byte[] table, byte[] row, byte[] columnFamily) throws RedisForemanException
 	{
-		Map<RedisBigTableKey, byte[]> all = getAll(table);
+		Map<RedisBigTableKey, byte[]> all = this.getByRow(table, row);
+		boolean cfHasWildCard = Utils.hasWildCard(columnFamily);
 		String keyIsLike = join(Utils.RECORD_SEPARATOR, row, columnFamily);
 		Map<RedisBigTableKey, byte[]> toReturn = new HashMap<RedisBigTableKey, byte[]>();
 		for (Entry<RedisBigTableKey, byte[]> ent : all.entrySet())
 		{
-			if (startsWith(ent.getKey(), keyIsLike))
+			if (cfHasWildCard || startsWith(ent.getKey(), keyIsLike))
 			{
 				toReturn.put(ent.getKey(), ent.getValue());
 			}
@@ -357,9 +359,15 @@ public class RedisForeman
 	 * @throws RedisForemanException table does not exist
 	 */
 	/*Test: RedisForemanTest.writeToTableTest*/
-	public Entry<RedisBigTableKey, byte[]> getByQualifier(byte[] table, byte[] row, byte[] cf, byte[] cq) throws RedisForemanException
+	public Map<RedisBigTableKey, byte[]> getByQualifier(byte[] table, byte[] row, byte[] cf, byte[] cq) throws RedisForemanException
 	{
-		return getByKey(table, new RedisBigTableKey(row, cf, cq));
+		boolean hasWildCard = Utils.hasWildCard(cq);
+		if (hasWildCard)
+		{
+			return getByFamily(table, row, cf);
+		}
+		Map<RedisBigTableKey, byte[]> entries = getByKey(table, new RedisBigTableKey(row, cf, cq));
+		return entries;
 	}
 
 	/**
@@ -370,21 +378,27 @@ public class RedisForeman
 	 * @throws RedisForemanException
 	 */
 	/*Test: RedisForemanTest.writeToTableTest*/
-	public Entry<RedisBigTableKey, byte[]> getByKey(byte[] table, RedisBigTableKey k) throws RedisForemanException
+	public Map<RedisBigTableKey, byte[]> getByKey(byte[] table, RedisBigTableKey k) throws RedisForemanException
 	{
 		boolean tableExists = tableExists(table);
 		boolean emptyParts = hasEmptyParts(k);
 		if (tableExists && !emptyParts)
 		{
-			byte[] val = instance.hget(table, k.toRedisField());
-			if (val == null)
+			Map<RedisBigTableKey, byte[]> toReturn = new HashMap<RedisBigTableKey, byte[]>();
+			Set<byte[]> redisKeys = instance.hkeys(table);
+			for (byte[] value : redisKeys)
 			{
-				return null;
+				RedisBigTableKey inflated = RedisBigTableKey.inflate(value);
+				if (inflated.matches(k))
+				{
+					byte[] val = instance.hget(table, inflated.toRedisField());
+					if (val != null)
+					{
+						toReturn.put(inflated, val);
+					}
+				}
 			}
-			Map<RedisBigTableKey, byte[]> value = new HashMap<RedisBigTableKey, byte[]>();
-			value.put(k, val);
-			value.entrySet();
-			return value.entrySet().iterator().next();
+			return toReturn;
 		}
 		else if (emptyParts)
 		{
@@ -409,8 +423,8 @@ public class RedisForeman
 	/*Test: RedisForemanTest.writeToTableTest*/
 	public boolean entryExists(byte[] table, byte[] row, byte[] cf, byte[] cq, byte[] value) throws RedisForemanException
 	{
-		Entry<RedisBigTableKey, byte[]> ent = getByQualifier(table, row, cf, cq);
-		if (ent != null)
+		Map<RedisBigTableKey, byte[]> entries = getByQualifier(table, row, cf, cq);
+		for (Entry<RedisBigTableKey, byte[]> ent : entries.entrySet())
 		{
 			if (ent.getValue().length == value.length)
 			{
@@ -420,8 +434,11 @@ public class RedisForeman
 					byte b1 = ent.getValue()[i];
 					byte b2 = value[i];
 					equals = equals && (b1 == b2);
+					if (equals)
+					{
+						return true;
+					}
 				}
-				return equals;
 			}
 		}
 		return false;
@@ -439,7 +456,7 @@ public class RedisForeman
 	/*Test: RedisForemanTest.writeToTableTest*/
 	public boolean columnQualifierExists(byte[] table, byte[] row, byte[] cf, byte[] cq) throws RedisForemanException
 	{
-		return getByQualifier(table, row, cf, cq) != null;
+		return !getByQualifier(table, row, cf, cq).isEmpty();
 	}
 
 	/**
@@ -497,14 +514,14 @@ public class RedisForeman
 		byte[] cf = row;
 		byte[] cq = row;
 		RedisBigTableKey rowKey = new RedisBigTableKey(r, cf, cq);
-		Entry<RedisBigTableKey, byte[]> returned = getByKey(ForemanConstants.TableIdentifier.ROW.getId(), rowKey);
-		if (returned == null)
+		Map<RedisBigTableKey, byte[]> returned = getByKey(ForemanConstants.TableIdentifier.ROW.getId(), rowKey);
+		if (returned.isEmpty())
 		{
 			return 0;
 		}
 		else
 		{
-			int instancesOfRow = Integer.parseInt(new String(returned.getValue()));
+			int instancesOfRow = Integer.parseInt(new String(returned.entrySet().iterator().next().getValue()));
 			return instancesOfRow;
 		}
 	}
@@ -527,22 +544,10 @@ public class RedisForeman
 
 	private boolean hasWildCard(RedisBigTableKey key)
 	{
-		boolean hasWildCard = hasWildCard(key.getRow());
-		hasWildCard = hasWildCard && hasWildCard(key.getColumnFamily());
-		hasWildCard = hasWildCard && hasWildCard(key.getColumnQualifier());
+		boolean hasWildCard = Utils.hasWildCard(key.getRow());
+		hasWildCard = hasWildCard && Utils.hasWildCard(key.getColumnFamily());
+		hasWildCard = hasWildCard && Utils.hasWildCard(key.getColumnQualifier());
 		return hasWildCard;
-	}
-
-	private boolean hasWildCard(byte[] bytes)
-	{
-		for (byte part : bytes)
-		{
-			if (part == Utils.WILD_CARD)
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private boolean hasEmptyParts(RedisBigTableKey key)
@@ -559,14 +564,14 @@ public class RedisForeman
 		byte[] cf = row;
 		byte[] cq = row;
 		RedisBigTableKey rowKey = new RedisBigTableKey(r, cf, cq);
-		Entry<RedisBigTableKey, byte[]> returned = getByKey(ForemanConstants.TableIdentifier.ROW.getId(), rowKey);
-		if (returned == null)
+		Map<RedisBigTableKey, byte[]> returned = getByKey(ForemanConstants.TableIdentifier.ROW.getId(), rowKey);
+		if (returned.isEmpty())
 		{
 			instance.hset(ForemanConstants.TableIdentifier.ROW.getId(), rowKey.toRedisField(), "1".getBytes());
 		}
 		else
 		{
-			int instanceOfRow = Integer.parseInt(new String(returned.getValue()));
+			int instanceOfRow = Integer.parseInt(new String(returned.entrySet().iterator().next().getValue()));
 			instanceOfRow++;
 			instance.hset(ForemanConstants.TableIdentifier.ROW.getId(), rowKey.toRedisField(), (instanceOfRow + "").getBytes());
 		}

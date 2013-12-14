@@ -143,4 +143,15 @@ public class RedisBigTableKey
 		}
 		return toReturn;
 	}
+
+	public boolean matches(RedisBigTableKey k)
+	{
+		byte[] otherRow = k.getRow();
+		byte[] otherFamily = k.getColumnFamily();
+		byte[] otherQualifier = k.getColumnQualifier();
+		boolean rowMatches = Utils.hasWildCard(otherRow) || Utils.byteArraysEqual(this.row, otherRow);
+		boolean famMatches = Utils.hasWildCard(otherFamily) || Utils.byteArraysEqual(this.cf, otherFamily);
+		boolean qualMatches = Utils.hasWildCard(otherQualifier) || Utils.byteArraysEqual(this.cq, otherQualifier);
+		return rowMatches && famMatches && qualMatches;
+	}
 }

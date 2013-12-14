@@ -22,4 +22,26 @@ public class Utils
 	public static final byte WILD_CARD = '*';
 	public static final byte[] EMPTY = new byte[] {};
 
+	public static boolean hasWildCard(byte[] bytes)
+	{
+		if (bytes.length > 0)
+		{
+			return bytes[0] == Utils.WILD_CARD;
+		}
+		return false;
+	}
+
+	public static boolean byteArraysEqual(byte[] first, byte[] second)
+	{
+		if (first.length == second.length)
+		{
+			boolean equals = true;
+			for (int i = 0; i < first.length; i++)
+			{
+				equals = equals && first[i] == second[i];
+			}
+			return equals;
+		}
+		return false;
+	}
 }
