@@ -13,7 +13,6 @@ import edu.american.student.redis.hadoop.RedisBigTableKey;
 
 public class RedisForemanTest
 {
-	//	private static RedisForeman foreman = new RedisForeman();
 
 	@BeforeClass
 	public static void before() throws Exception
@@ -41,7 +40,7 @@ public class RedisForemanTest
 	}
 
 	@Test
-	public void deleteTablesTest()
+	public void deleteTablesTest() throws Exception
 	{
 		RedisForeman foreman = new RedisForeman();
 		byte[] exampleTable1 = "example".getBytes();
@@ -69,7 +68,10 @@ public class RedisForemanTest
 		foreman.createTable(exampleTable1);
 		foreman.write(exampleTable1, key, Utils.EMPTY);
 		int instances = foreman.getInstancesOfRow(r);
-		System.out.println(instances);
+		assertTrue("Number of Row instances not showing up", instances == 1);
+		foreman.deleteRow(exampleTable1, key);
+		instances = foreman.getInstancesOfRow(r);
+		assertTrue("Number of Row instannces did not decrement after deletion", instances == 0);
 	}
 
 	@Test

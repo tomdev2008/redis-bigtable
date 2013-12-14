@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 import edu.american.student.redis.Utils;
+import edu.american.student.redis.foreman.ForemanConstants.TableIdentifier;
 import edu.american.student.redis.hadoop.RedisBigTableKey;
 
 /**
@@ -119,9 +120,10 @@ public class RedisForeman
 
 	/**
 	 * Deletes all tables.
+	 * @throws RedisForemanException 
 	 */
 	/*Test: RedisForemanTest.deleteTablesTest*/
-	public void deleteTables()
+	public void deleteTables() throws RedisForemanException
 	{
 		Set<byte[]> keys = instance.hkeys(ForemanConstants.TableIdentifier.TABLE.getId());
 		for (byte[] key : keys)
@@ -138,6 +140,7 @@ public class RedisForeman
 				log.info("Table {} deleted", new String(key));
 			}
 		}
+		clearSystemTables();
 	}
 
 	/**
@@ -181,10 +184,8 @@ public class RedisForeman
 		boolean tableExists = tableExists(table);
 		if (tableExists && !hasWildCard && !hasEmptyParts)
 		{
-			//the row itself
 			instance.hset(table, key.toRedisField(), value);
-			//log the instance of the row
-			logRow(key.getRow());
+			incrementRow(key.getRow());
 		}
 		else if (!tableExists)
 		{
@@ -236,9 +237,10 @@ public class RedisForeman
 	 * @param row The row identifier of the entry to delete
 	 * @param columnFamily The column family identifier of the entry to delete
 	 * @param columnQualifier The column qualifier identifier of the entry to delete
+	 * @throws RedisForemanException 
 	 */
 	/*Test: RedisForemanTest.writeToTableTest*/
-	public void deleteRow(byte[] table, byte[] row, byte[] columnFamily, byte[] columnQualifier)
+	public void deleteRow(byte[] table, byte[] row, byte[] columnFamily, byte[] columnQualifier) throws RedisForemanException
 	{
 		deleteRow(table, new RedisBigTableKey(row, columnFamily, columnQualifier));
 	}
@@ -247,15 +249,17 @@ public class RedisForeman
 	 * Removes a Entry
 	 * @param table table where the entry to delete is
 	 * @param redisBigTableKey The key to delete
+	 * @throws RedisForemanException 
 	 */
 	/*Test: RedisForemanTest.writeToTableTest*/
-	public void deleteRow(byte[] table, RedisBigTableKey redisBigTableKey)
+	public void deleteRow(byte[] table, RedisBigTableKey redisBigTableKey) throws RedisForemanException
 	{
 		boolean tableExists = tableExists(table);
 		boolean emptyParts = hasEmptyParts(redisBigTableKey);
 		if (tableExists && !emptyParts)
 		{
 			instance.hdel(table, redisBigTableKey.toRedisField());
+			decrementRow(redisBigTableKey.getRow());
 		}
 		else if (emptyParts)
 		{
@@ -468,9 +472,10 @@ public class RedisForeman
 	 * Removes rows 
 	 * @param table
 	 * @param map
+	 * @throws RedisForemanException 
 	 */
 	/*Test: RedisForemanTest.writeToTableTest*/
-	public void deleteRows(byte[] table, Map<RedisBigTableKey, byte[]> map)
+	public void deleteRows(byte[] table, Map<RedisBigTableKey, byte[]> map) throws RedisForemanException
 	{
 		for (Entry<RedisBigTableKey, byte[]> ent : map.entrySet())
 		{
@@ -541,7 +546,7 @@ public class RedisForeman
 		return emptyParts;
 	}
 
-	private void logRow(byte[] row) throws RedisForemanException
+	private void incrementRow(byte[] row) throws RedisForemanException
 	{
 		byte[] r = "ROW_LOG".getBytes();
 		byte[] cf = row;
@@ -556,8 +561,47 @@ public class RedisForeman
 		{
 			int instanceOfRow = Integer.parseInt(new String(returned.getValue()));
 			instanceOfRow++;
+			log.info("Increment row {} {}", new String(row), instanceOfRow);
 			instance.hset(ForemanConstants.TableIdentifier.ROW.getId(), rowKey.toRedisField(), (instanceOfRow + "").getBytes());
 		}
+	}
 
+	private void decrementRow(byte[] row) throws RedisForemanException
+	{
+		int instancesOfRow = this.getInstancesOfRow(row);
+		instancesOfRow--;
+		setRowInstanceCount(row, instancesOfRow);
+	}
+
+	private void setRowInstanceCount(byte[] row, int instancesOfRow)
+	{
+		byte[] r = "ROW_LOG".getBytes();
+		byte[] cf = row;
+		byte[] cq = row;
+		RedisBigTableKey rowKey = new RedisBigTableKey(r, cf, cq);
+		if (instancesOfRow > 0)
+		{
+			instance.hset(ForemanConstants.TableIdentifier.ROW.getId(), rowKey.toRedisField(), (instancesOfRow + "").getBytes());
+		}
+		else
+		{
+			instance.hdel(ForemanConstants.TableIdentifier.ROW.getId(), rowKey.toRedisField());
+		}
+
+	}
+
+	private void clearSystemTables() throws RedisForemanException
+	{
+		for (TableIdentifier idd : TableIdentifier.values())
+		{
+			if (!idd.equals(TableIdentifier.TABLE))
+			{
+				Map<RedisBigTableKey, byte[]> entries = getAll(idd.getId());
+				for (Entry<RedisBigTableKey, byte[]> entry : entries.entrySet())
+				{
+					deleteRow(idd.getId(), entry.getKey());
+				}
+			}
+		}
 	}
 }
