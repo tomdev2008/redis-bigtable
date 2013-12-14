@@ -228,11 +228,17 @@ public class RedisForeman
 	/*Test: RedisForemanTest.writeToTableTest*/
 	public void deleteRow(byte[] table, RedisBigTableKey redisBigTableKey)
 	{
-		if (tableExists(table))
+		boolean tableExists = tableExists(table);
+		boolean emptyParts = hasEmptyParts(redisBigTableKey);
+		if (tableExists && !emptyParts)
 		{
 			instance.hdel(table, redisBigTableKey.toRedisField());
 		}
-		else
+		else if (emptyParts)
+		{
+			log.warn("Delete Row failed. Key has empty parts {}", new String(redisBigTableKey.toRedisField()));
+		}
+		else if (!tableExists)
 		{
 			log.warn("Delete Row failed. Table {} does not exist.", new String(table));
 		}
@@ -338,7 +344,9 @@ public class RedisForeman
 	/*Test: RedisForemanTest.writeToTableTest*/
 	public Entry<RedisBigTableKey, byte[]> getByKey(byte[] table, RedisBigTableKey k) throws RedisForemanException
 	{
-		if (tableExists(table))
+		boolean tableExists = tableExists(table);
+		boolean emptyParts = hasEmptyParts(k);
+		if (tableExists && !emptyParts)
 		{
 			byte[] val = instance.hget(table, k.toRedisField());
 			if (val == null)
@@ -350,7 +358,14 @@ public class RedisForeman
 			value.entrySet();
 			return value.entrySet().iterator().next();
 		}
-		throw new RedisForemanException("Get Entry by Key failed. Table " + new String(table) + " does not exist");
+		else if (emptyParts)
+		{
+			throw new RedisForemanException("Get Entry by Key failed. Key  has empty parts. " + new String(k.toRedisField()));
+		}
+		else
+		{
+			throw new RedisForemanException("Get Entry by Key failed. Table " + new String(table) + " does not exist");
+		}
 	}
 
 	/**
