@@ -20,36 +20,41 @@ package edu.american.student.redis.foreman;
  * @author cam
  *
  */
-public enum ForemanConstants
+public class ForemanConstants
 {
-	/**
-	 * The redis-server host IP. Jedis connects using this host number
-	 */
-	REDIS_HOST,
-	/**
-	 * The redis-server host port. Jedis connects using this port number
-	 */
-	REDIS_PORT;
-
-	private String value;
-
-	ForemanConstants()
+	public enum RedisConstants
 	{
-		String env = System.getenv(this.name());
-		if (env == null)
+		/**
+		 * The redis-server host IP. Jedis connects using this host number
+		 */
+		REDIS_HOST,
+		/**
+		 * The redis-server host port. Jedis connects using this port number
+		 */
+		REDIS_PORT;
+
+		private String value;
+
+		RedisConstants()
 		{
-			env = System.getProperty(this.name());
+			String env = System.getenv(this.name());
 			if (env == null)
 			{
-				throw new RuntimeException("Property:" + this.name() + " is not an env or property");
+				env = System.getProperty(this.name());
+				if (env == null)
+				{
+					throw new RuntimeException("Property:" + this.name() + " is not an env or property");
+				}
 			}
+			value = env;
 		}
-		value = env;
+
+		@Override
+		public String toString()
+		{
+			return value;
+		}
 	}
 
-	@Override
-	public String toString()
-	{
-		return value;
-	}
+	public static final byte[] TABLE_ID = "TABLE".getBytes();
 }

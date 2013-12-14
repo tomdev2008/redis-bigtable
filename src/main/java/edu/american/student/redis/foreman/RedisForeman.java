@@ -50,8 +50,8 @@ public class RedisForeman
 	/*Test: RedisForemanTest.connectionTest*/
 	public void connect()
 	{
-		host = ForemanConstants.REDIS_HOST.toString();
-		port = Integer.parseInt(ForemanConstants.REDIS_PORT.toString());
+		host = ForemanConstants.RedisConstants.REDIS_HOST.toString();
+		port = Integer.parseInt(ForemanConstants.RedisConstants.REDIS_PORT.toString());
 		instance = new Jedis(host, port);
 		log.info("{} connected {} {}", new Object[] { RedisForeman.class.getSimpleName(), host, port });
 	}
@@ -76,7 +76,7 @@ public class RedisForeman
 	{
 		if (!tableExists(table))
 		{
-			instance.hset("TABLE".getBytes(), table, "CREATED".getBytes());
+			instance.hset(ForemanConstants.TABLE_ID, table, "CREATED".getBytes());
 		}
 		else
 		{
@@ -93,7 +93,7 @@ public class RedisForeman
 	{
 		if (tableExists(table))
 		{
-			instance.hdel("TABLE".getBytes(), table);
+			instance.hdel(ForemanConstants.TABLE_ID, table);
 			Set<byte[]> keys = instance.hkeys(table);
 			for (byte[] key : keys)
 			{
@@ -112,7 +112,7 @@ public class RedisForeman
 	/*Test: RedisForemanTest.deleteTablesTest*/
 	public void deleteTables()
 	{
-		Set<byte[]> keys = instance.hkeys("TABLE".getBytes());
+		Set<byte[]> keys = instance.hkeys(ForemanConstants.TABLE_ID);
 		for (byte[] key : keys)
 		{
 			Set<byte[]> subkeys = instance.hkeys(key);
@@ -120,7 +120,7 @@ public class RedisForeman
 			{
 				instance.hdel(key, subkey);
 			}
-			instance.hdel("TABLE".getBytes(), key);
+			instance.hdel(ForemanConstants.TABLE_ID, key);
 			log.info("Table {} deleted", new String(key));
 		}
 	}
@@ -133,7 +133,7 @@ public class RedisForeman
 	/*Test: RedisForemanTest.createDeleteTableTest*/
 	public boolean tableExists(byte[] table)
 	{
-		return instance.hexists("TABLE".getBytes(), table);
+		return instance.hexists(ForemanConstants.TABLE_ID, table);
 	}
 
 	/**
