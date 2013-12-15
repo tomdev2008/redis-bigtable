@@ -13,6 +13,11 @@ public class RedisBigTableInputSplit extends InputSplit implements Writable
 	private byte[] value;
 	private byte[] table;
 
+	public RedisBigTableInputSplit()
+	{
+
+	}
+
 	public RedisBigTableInputSplit(byte[] t, RedisBigTableKey k, byte[] v)
 	{
 		key = k;
