@@ -35,3 +35,7 @@ From the root directory, run `mvn clean install`. It is HIGHLY recommened you do
 ### Hadoop Connectors
 
 ## Examples
+
+## License
+
+* Apache License version 2
