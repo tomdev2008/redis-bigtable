@@ -2,7 +2,7 @@ redis-bigtable
 ==============
 ## Brief Introduction
 
-Redis additions that mimic Accumulo's structure with Hadoop connectors..  If you're familiar with BigTable NoSQL databases, like Accumulo or HBase, this it a redis implementation of (a simplified) Accumulo. It does not have customized iterators or use distributed locking through Apache Zookeeper (yet). 
+Redis additions that mimic Accumulo's structure with Hadoop connectors..  If you're familiar with BigTable NoSQL databases, like Accumulo or HBase, this is a redis implementation of (a simplified) Accumulo. It does not have customized iterators or use distributed locking through Apache Zookeeper (yet). 
 
 This project was inspired because I really enjoy the constraint-based, key-value paradigm Accumulo offers, but I dislike how much heapspace it hogs. So, you won't find tablet servers, garbage collectors or monitors.
 
