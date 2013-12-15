@@ -11,11 +11,13 @@ public class RedisBigTableInputSplit extends InputSplit implements Writable
 {
 	private RedisBigTableKey key;
 	private byte[] value;
+	private byte[] table;
 
-	public RedisBigTableInputSplit(RedisBigTableKey k, byte[] v)
+	public RedisBigTableInputSplit(byte[] t, RedisBigTableKey k, byte[] v)
 	{
 		key = k;
 		value = v;
+		table = t;
 	}
 
 	@Override
@@ -27,7 +29,7 @@ public class RedisBigTableInputSplit extends InputSplit implements Writable
 	@Override
 	public String[] getLocations() throws IOException, InterruptedException
 	{
-		return new String[] {new String(key.toRedisField())};
+		return new String[] { new String(key.toRedisField()), new String(table) };
 	}
 
 	@Override
@@ -35,6 +37,7 @@ public class RedisBigTableInputSplit extends InputSplit implements Writable
 	{
 		key = RedisBigTableKey.inflate(in.readUTF().getBytes());
 		value = in.readUTF().getBytes();
+		table = in.readUTF().getBytes();
 	}
 
 	@Override
@@ -42,6 +45,7 @@ public class RedisBigTableInputSplit extends InputSplit implements Writable
 	{
 		out.writeUTF(new String(key.toRedisField()));
 		out.writeUTF(new String(value));
+		out.writeUTF(new String(table));
 
 	}
 

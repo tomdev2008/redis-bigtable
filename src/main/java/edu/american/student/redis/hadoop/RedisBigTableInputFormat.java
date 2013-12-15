@@ -17,11 +17,17 @@ public class RedisBigTableInputFormat extends InputFormat<RedisBigTableKey, Text
 	private List<byte[]> cfs = new ArrayList<byte[]>();
 	private List<byte[]> cqs = new ArrayList<byte[]>();
 	private List<byte[]> values = new ArrayList<byte[]>();
+	private byte[] table;
 
 	@Override
 	public RecordReader<RedisBigTableKey, Text> createRecordReader(InputSplit arg0, TaskAttemptContext arg1) throws IOException, InterruptedException
 	{
 		return new RedisBigTableRecordReader();
+	}
+
+	public void setTable(byte[] table)
+	{
+		this.table = table;
 	}
 
 	public void fetchRows(byte[]... rows)
@@ -86,7 +92,7 @@ public class RedisBigTableInputFormat extends InputFormat<RedisBigTableKey, Text
 					for (byte[] v : values)
 					{
 						RedisBigTableKey k = new RedisBigTableKey(r, cf, cq);
-						splits.add(new RedisBigTableInputSplit(k, v));
+						splits.add(new RedisBigTableInputSplit(table, k, v));
 					}
 				}
 			}
