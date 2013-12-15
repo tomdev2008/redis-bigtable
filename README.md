@@ -28,3 +28,10 @@ I don't have a private nexus instance to host the jar/pom file. So at the moment
 
 From the root directory, run `mvn clean install`. It is HIGHLY recommened you do not use the `-DskipTests` flag. Tests located in `src/test/java` validate your connection to redis.
 
+## Quick Start
+
+### The RedisForeman
+
+### Hadoop Connectors
+
+## Examples
