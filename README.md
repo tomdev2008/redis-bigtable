@@ -1,27 +1,37 @@
 redis-bigtable
 ==============
 
-BigTable inspired connector for Hadoop 1.0.3. 
+BigTable inspired redis additions with connectors for Hadoop 1.0.3. 
 
-### What you get out of the box
+## Installation
 
-* The RedisForeman to intereact with redis. 
-  * It's based off Jedis
-  * It enforces BigTable constraints on redis
-    * Every BigTable Entry has the following
-    * &lt;table&gt; &lt;row&gt; &lt;column family&gt; &lt;column qualifier&gt; &lt;value&gt;
-    * For Example:
-  
-          `ROW----CF------CQ-------VALUE`
+To avoid configuration files, there are certain environment variables to set for the RedisForeman to properly connect to your redis instance.
 
-          `PLANTS-COLEUS--LENGTH---5 `
-          
-         ` PLANTS-COLEUS--COLOR---GREEN`
+### Linux
 
-* The Map/Reduce InputFormat and OutputFormat to build M/R jobs reading/writing to Redis
+Put these values in `/etc/environment` & restart
 
+    REDIS_HOST=<IP address of your redis instance e.g 127.0.0.1>
+    REDIS_PORT=<PORT of your redis instance, e.g 6379>
 
-### Work In Progress
+### Mac
 
-This project is  a work in process. Assume Unstable. I hope to finish it by the end of the week Nov 24 2013. 
-I'll be sure to document everything.
+Put these values in `/etc/profile` & restart
+
+    REDIS_HOST=<IP address of your redis instance e.g 127.0.0.1>
+    REDIS_PORT=<PORT of your redis instance, e.g 6379>
+    
+
+### Building the uber-jar
+
+I don't have a private nexus instance to host the jar/pom file. So at the moment, you'll have to build the uber-jar.
+
+From the root directory, run `mvn clean install`. It is HIGHLY recommened you do not use the `-DskipTests` flag. Tests located in `src/test/java` validate your connection to redis.
+
+## Quick Start
+
+### The RedisForeman
+
+### Hadoop Connectors
+
+## Examples
