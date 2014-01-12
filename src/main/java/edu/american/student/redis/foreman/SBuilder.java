@@ -13,9 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.american.student.redis;
+package edu.american.student.redis.foreman;
 
-public abstract class MFactory
+import java.io.Serializable;
+
+public abstract class SBuilder implements Serializable
 {
+	private static final long serialVersionUID = 5163169675236148188L;
+	protected ScannerBuilder instance;
+
+	public SBuilder()
+	{
+
+	}
+
+	public SBuilder(ScannerBuilder sbuild)
+	{
+		instance = sbuild;
+	}
+
+	public ScannerBuilder getInstance()
+	{
+		return instance;
+	}
+
+	@Override
+	public String toString()
+	{
+		return instance.toString();
+	}
+
+	public abstract byte[] getTable();
 
 }
