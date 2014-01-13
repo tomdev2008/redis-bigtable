@@ -107,6 +107,13 @@ The RedisForeman connects to redis (via Jedis) and provides the interface to mak
 
 ### Hadoop Connectors
 
+* [RedisBigTableInputFormat](https://github.com/Ccook/redis-bigtable/blob/master/src/main/java/edu/american/student/redis/hadoop/RedisBigTableInputFormat.java)
+* [RedisBigTableInputSplit](https://github.com/Ccook/redis-bigtable/blob/master/src/main/java/edu/american/student/redis/hadoop/RedisBigTableInputSplit.java)
+* [RedisBigTableKey](https://github.com/Ccook/redis-bigtable/blob/master/src/main/java/edu/american/student/redis/hadoop/RedisBigTableKey.java)
+* [RedisBigTableOutputFormat](https://github.com/Ccook/redis-bigtable/blob/master/src/main/java/edu/american/student/redis/hadoop/RedisBigTableOutputFormat.java)
+* [RedisBigTableRecordReader](https://github.com/Ccook/redis-bigtable/blob/master/src/main/java/edu/american/student/redis/hadoop/RedisBigTableRecordReader.java)
+* [RedisBigTableRecordWriter](https://github.com/Ccook/redis-bigtable/blob/master/src/main/java/edu/american/student/redis/hadoop/RedisBigTableRecordWriter.java)
+
 ## Examples
 
 ## License
