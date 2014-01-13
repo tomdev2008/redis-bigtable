@@ -45,4 +45,10 @@ public abstract class SBuilder implements Serializable
 
 	public abstract byte[] getTable();
 
+	public abstract byte[][] getRows();
+
+	public abstract byte[][] getFamiles();
+
+	public abstract byte[][] getQualifiers();
+
 }

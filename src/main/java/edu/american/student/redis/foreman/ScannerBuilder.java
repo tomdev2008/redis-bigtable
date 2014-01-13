@@ -52,11 +52,6 @@ public class ScannerBuilder extends SBuilder
 		return this;
 	}
 
-	public byte[][] getRange()
-	{
-		return rows;
-	}
-
 	public byte[][] getColumnQualifier()
 	{
 		return qualifier;
@@ -68,4 +63,21 @@ public class ScannerBuilder extends SBuilder
 		return table.getBytes();
 	}
 
+	@Override
+	public byte[][] getRows()
+	{
+		return rows;
+	}
+
+	@Override
+	public byte[][] getFamiles()
+	{
+		return family;
+	}
+
+	@Override
+	public byte[][] getQualifiers()
+	{
+		return qualifier;
+	}
 }
