@@ -27,6 +27,8 @@ Put these values in `/etc/profile` & restart
 
 ### Building the uber-jar
 
+(EDIT: I'm working on getting the code stable enough to submit to Maven Central - 1/13/14)
+
 I don't have a private nexus instance to host the jar/pom file. So at the moment, you'll have to build the uber-jar.
 
 From the root directory, run `mvn clean install`. It is HIGHLY recommened you do not use the `-DskipTests` flag. Tests located in `src/test/java` validate your connection to redis.
