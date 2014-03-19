@@ -3,7 +3,42 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.american.student</groupId>
 	<artifactId>redis-bigtable</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<name>redis-bigtable - BigTable inspired additions for Redis</name>
+	<description>BigTable inspired additions for Redis</description>
+	<packaging>jar</packaging>
+	<url>http://www.github.com/ccook</url>
+	<version>1.0</version>
+	<developers>
+		<developer>
+			<id>ckcook</id>
+			<name>Cam Cook</name>
+			<email>cam.cook@linux.com</email>
+			<url>http://www.github.com/ccook</url>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
+	</developers>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
+	<scm>
+		<connection>scm:git:git@github.com:ccook/redis-bigtable.git</connection>
+		<url>scm:git:git@github.com:ccook/redis-bigtable.git</url>
+		<developerConnection>scm:git:git@github.com:ccook/redis-bigtable.git</developerConnection>
+	</scm>
+	<distributionManagement>
+		<repository>
+			<id>bintray-ckcook-maven-redis-bigtable</id>
+			<name>ckcook-maven-redis-bigtable</name>
+			<url>https://api.bintray.com/maven/ckcook/maven/redis-bigtable</url>
+		</repository>
+	</distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -35,6 +70,43 @@
 	</dependencies>
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.0</version>
