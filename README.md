@@ -33,6 +33,21 @@ I don't have a private nexus instance to host the jar/pom file. So at the moment
 
 From the root directory, run `mvn clean install`. It is HIGHLY recommened you do not use the `-DskipTests` flag. Tests located in `src/test/java` validate your connection to redis.
 
+
+### Maven / SBT
+
+```xml
+<dependency>
+    <groupId>com.celexus</groupId>
+    <artifactId>redis-bigtable</artifactId>
+    <version>1.0.1</version>
+</dependency>
+```
+
+```
+libraryDependencies += "com.celexus" % "redis-bigtable" % "1.0.1"
+```
+
 ## Quick Start
 
 ### The RedisForeman
